@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление БПЛА</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            margin: 10px; /* Отделяем кнопки друг от друга */
+        }
+        #status {
+            margin-top: 20px; /* Отделяем статус от кнопок */
+        }
+        .button-container {
+            display: flex; /* Используем flex для выравнивания кнопок в строку */
+            justify-content: flex-start; /* Выровнять кнопки по левому краю */
+        }
+    </style>
+</head>
+<body>
+    <h1>Управление БПЛА</h1>
+
+    <div class="button-container">
+        <button onclick="sendCommand('ascend')">Взлет</button>
+        <button onclick="sendCommand('descend')">Посадка</button>
+    </div>
+
+    <div class="button-container">
+        <button onclick="sendCommand('forward')">Вперед</button>
+        <button onclick="sendCommand('backward')">Назад</button>
+    </div>
+
+    <div class="button-container">
+        <button onclick="sendCommand('left')">Влево</button>
+        <button onclick="sendCommand('right')">Вправо</button>
+    </div>
+
+    <div class="button-container">
+        <button onclick="sendCommand('ascend')">Выше</button>
+        <button onclick="sendCommand('descend')">Ниже</button>
+    </div>
+
+    <div>
+        <button onclick="startAutopilot()">Патрулирование</button>
+    </div>
+
+    <div>
+        <button onclick="saveTrajectory()">Сохранить траекторию</button>
+    </div>
+
+    <div id="status">
+        <p id="battery">Заряд: 100%</p>
+        <p id="altitude">Высота: 0 м</p>
+        <p id="currentMission">Текущая миссия: Нет</p>
+    </div>
+
+    <script>
+        async function sendCommand(command) {
+            const response = await fetch('/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command })
+            });
+            const data = await response.json();
+            document.getElementById('currentMission').innerText = `Текущая миссия: ${command}`;
+            updateDroneStatus();
+        }
+
+        async function updateDroneStatus() {
+            const response = await fetch('/status');
+            const status = await response.json();
+            document.getElementById('battery').innerText = `Заряд: ${status.battery_level}%`;
+            document.getElementById('altitude').innerText = `Высота: ${status.altitude} м`;
+        }
+
+        async function startAutopilot() {
+            const response = await fetch('/autopilot', { method: 'POST' });
+            const data = await response.json();
+            document.getElementById('currentMission').innerText = `Текущая миссия: Патрулирование`;
+        }
+
+        async function saveTrajectory() {
+            const response = await fetch('/save_trajectory', { method: 'POST' });
+            const data = await response.json();
+            alert(data.status); // Сообщение о статусе сохранения
+        }
+    </script>
+</body>
+</html>
