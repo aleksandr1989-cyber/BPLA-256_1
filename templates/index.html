@@ -34,13 +34,8 @@
     </div>
 
     <div class="button-container">
-        <button onclick="sendCommand('left')">Влево</button>
-        <button onclick="sendCommand('right')">Вправо</button>
-    </div>
-
-    <div class="button-container">
-        <button onclick="sendCommand('ascend')">Выше</button>
-        <button onclick="sendCommand('descend')">Ниже</button>
+        <button onclick="sendCommand('up')">Выше</button>
+        <button onclick="sendCommand('down')">Ниже</button>
     </div>
 
     <div>
@@ -51,13 +46,23 @@
         <button onclick="saveTrajectory()">Сохранить траекторию</button>
     </div>
 
-    <div id="status">
-        <p id="battery">Заряд: 100%</p>
-        <p id="altitude">Высота: 0 м</p>
-        <p id="currentMission">Текущая миссия: Нет</p>
-    </div>
+    <p>Высота: <span id="altitude">0 м</span></p>
+    <p>Заряд: <span id="battery">100%</span></p>
+    <p>Текущая миссия: <span id="current_mission">Нет</span></p>
 
     <script>
+
+        setInterval(() => {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('altitude').innerText = data.altitude + ' м';
+                    document.getElementById('battery').innerText = data.battery_level + '%';
+                    document.getElementById('current_mission').innerText = data.current_command;
+                });
+        }, 1500);  // Каждые 1,5 секунды
+
+
         async function sendCommand(command) {
             const response = await fetch('/control', {
                 method: 'POST',
